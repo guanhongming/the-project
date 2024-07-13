@@ -4,7 +4,7 @@
     <form name="login-form" @submit.prevent="handleLogin">
       <div class="mb-3">
         <label for="username">Username: </label>
-        <input id="username" v-model.trim.lazy="formV.username" type="text" />
+        <input id="username" v-model.trim.lazy="formV.name" type="text" />
       </div>
       <div class="mb-3">
         <label for="password">Password: </label>
@@ -33,7 +33,7 @@
     data() {
       return {
         formV: {
-          username: '',
+          name: '',
           password: ''
         },
         showSMSVerification: false
@@ -44,11 +44,22 @@
         SMSVerification
     },
     methods: {
-      handleLogin() {
+      async handleLogin() {
+        try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
+        const response = await axios.post('/login', this.formV);//csrf issue
+        if (response.data.message === "ok") {
+            this.$router.push({ name: 'Dash' });
+        }
 
-        console.log('Username:', this.formV.username);
-        console.log('Password:', this.formV.password);
-        this.showSMSVerification=true;
+      } catch (error) {
+
+        console.error('Registration failed:', error.message);
+        // Handle validation errors here
+      }
+
+        //this.showSMSVerification=true;
 
       },
       handleVerification() {

@@ -18,8 +18,9 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'email',
+        'phone',
         'password',
+        "area_code"
     ];
 
     /**
@@ -32,6 +33,7 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+
     /**
      * Get the attributes that should be cast.
      *
@@ -41,7 +43,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+
         ];
     }
 }

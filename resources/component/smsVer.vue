@@ -2,18 +2,25 @@
   <div v-if="showPopup" class="sms-verification-popup">
     <h3>Verify Phone Number</h3>
     <form @submit.prevent="sendOTP">
-      <div class="mb-3">
-        <label for="phoneNumber">Enter your phone number:</label>
-        <input id="phoneNumber" v-model.trim="phoneNumber" type="text" />
+        <div class="mb-3">
+        <label for="areaCode">Area Code: </label>
+        <select v-model="areaCode" id="areaCode" required>
+          <option v-for="code in areaCodes" :key="code" :value="code">{{ code }}</option>
+        </select>
       </div>
+      <div class="mb-3">
+        <label for="phoneNumber">Phone number:</label>
+        <input id="phoneNumber" v-model="phoneNumber" type="text" />
+      </div>
+
       <button class="btn btn-primary" type="submit" :disabled="!phoneNumber.trim()">Verify Phone Number</button>
     </form>
-    
+
     <div v-if="showOTPForm">
       <form @submit.prevent="verifyOTP">
         <div class="mb-3">
           <label for="otp">Enter OTP:</label>
-          <input id="otp" v-model.trim="otp" type="text" />
+          <input id="otp" v-model="otp" type="text" />
         </div>
         <button class="btn btn-primary" type="submit" :disabled="!otp.trim()">Verify OTP</button>
       </form>
@@ -27,31 +34,68 @@
 <script>
 export default {
   name: 'SMSVerification',
+  props: {
+    phone:{
+        type:String,
+        default:undefined
+    },
+    area:{
+        type:String,
+        default:undefined
+    }
+  },
   data() {
     return {
-      phoneNumber: '',
       otp: '',
+      phoneNumber:'',
+      areaCode:'',
       showPopup: true,
-      showOTPForm: false
+      areaCodes: ['+1', '+44', '+91', '+81', '+86', '+49'] ,
+      showOTPForm: false,
+
     };
   },
+  created() {
+    console.log(this.phone);
+    if (this.area) {
+      this.areaCode = this.area;
+    }
+    if (this.phone) {
+      this.phoneNumber = this.phone;
+    }
+  },
   methods: {
-    sendOTP() {
-      // Send API request to send OTP to phoneNumber
-      // Example: Mocking API call
-      setTimeout(() => {
-        this.showOTPForm = true;
-      }, 1000); // Simulating delay for demo
+    async sendOTP() {
+        try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
+        const response = await axios.post('/otp', {phone:this.phoneNumber,area:this.areaCode});//csrf issue
+        if (response.data.message === "OTP sent") {
+            this.showOTPForm=true;
+        }
+
+      } catch (error) {
+
+        console.error('Registration failed:', error.response.data.errors);
+        // Handle validation errors here
+      }
     },
-    verifyOTP() {
-      // Send API request to verify OTP
-      // Example: Mocking OTP verification
-      setTimeout(() => {
-        alert('OTP Verified Successfully!');
-        this.showPopup = false;
-        this.showOTPForm = false;
-        // Optionally emit an event to notify parent component (Login or Signup)
-      }, 1000); // Simulating delay for demo
+    async verifyOTP() {
+        try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
+
+        const response = await axios.post('/verify', {otp:this.otp});//csrf issue
+        console.log(response);
+        if (response.status === 200) {
+            this.$router.push({ name: 'Dash' });
+        }
+
+      } catch (error) {
+
+        console.error('Registration failed:', response);
+        // Handle validation errors here
+      }
     }
   }
 };
