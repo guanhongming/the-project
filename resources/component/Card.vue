@@ -9,7 +9,7 @@
       </div>
     </div>
   </template>
-  
+
   <script>
   export default {
     name: 'MessageCard',
@@ -20,7 +20,7 @@
     },
       errorMessage: {
         type: String,
-  
+
       },
       hintText: {
         type: String,
@@ -28,7 +28,7 @@
       },
       hintLink: {
         type: String,
- 
+
       },
       hintLinkText: {
         type: String,
@@ -37,20 +37,32 @@
     }
   }
   </script>
-  
+
   <style scoped>
-  .message-card {
-    border: 1px solid #ddd;
-    padding: 1em;
-    margin: 1em 0;
-    border-radius: 5px;
-  }
-  .alert {
-    font-size: 0.9em;
-    color: red;
-  }
-  .hint {
-    font-size: 0.9em;
-  }
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+/* Apply the font to specific elements */
+*, *::before, *::after {
+  font-family: 'Roboto', sans-serif;
+}
+.message-card a {
+    .message-card {
+  padding: 15px;
+  background-color: #f0eeee; /* Updated background color */
+  border-radius: 4px;
+  text-align: center;
+  margin-top: 10px;
+  color: #333333; /* Updated text color */
+  font-size: 10px; /* Adjusted font size */
+}
+
+  color: #000000; /* Link text color */
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.message-card a:hover {
+  opacity: 0.4; /* Reduced opacity on hover */
+}
+
   </style>
-  
