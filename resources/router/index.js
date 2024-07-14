@@ -12,7 +12,7 @@ axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[nam
     const response = await axios.get('/pull');
     //console.log(response.status == 200);
     if (response.status === 200) {
-     
+
         localStorage.setItem('userData', JSON.stringify(response.data));
         if(to.path==='/dash'){
 
@@ -41,22 +41,28 @@ const router = createRouter({
       path: '/signup',
       name: 'Signup',
       component: Signup,
+      meta: { title: 'Sign Up' },
       beforeEnter: authGuard
     },
     {
       path: '/',
       name: 'Login',
       component: Login,
+      meta: { title: 'Login' },
       beforeEnter: authGuard
     },
     {
         path: '/dash',
         name: 'Dash',
         component: Dash,
+        meta: { title: 'Welcome' },
         beforeEnter: authGuard
       },
 
   ]
 })
-
+router.beforeEach((to, from, next) => {
+    document.title = to.meta.title || 'Custom-Login-Page';
+    next();
+});
 export default router

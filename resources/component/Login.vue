@@ -1,4 +1,9 @@
 <template>
+  <div v-show="isLoading"class="loading-overlay">
+  <div class="dot dot-1"></div>
+  <div class="dot dot-2"></div>
+  <div class="dot dot-3"></div>
+</div>
     <div class="container">
         <div class="content">
         <SMSVerification v-if="showSMSVerification" @verified="handleVerification" @close="showSMSVerification=false" />
@@ -47,6 +52,7 @@
     name: 'Login',
     data() {
       return {
+        isLoading: false,
         formV: {
           name: '',
           password: ''
@@ -82,6 +88,7 @@
         if(this.validate()){
             this.errors=this.errors.filter(error => error !== "Incorrect username or password");
         try {
+            this.isLoading = true;
             const scrf = await axios.get('/csrf');
             //console.log(scrf);
             const newCsrfToken = scrf.data.csrf_token;
@@ -92,6 +99,7 @@
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
         const response = await axios.post('/login', this.formV);//csrf issue
+
         if (response.data.message === "ok") {
             this.$router.push({ name: 'Dash' });
         }
@@ -105,6 +113,8 @@
                 this.errors.push("Incorrect username or password");
         }
 
+      }finally{
+        this.isLoading = false;
       }}
 
         //this.showSMSVerification=true;
@@ -121,7 +131,7 @@
   <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-/* Apply the font to specific elements */
+
 *, *::before, *::after {
   font-family: 'Roboto', sans-serif;
 }
@@ -135,8 +145,8 @@
   background-position: center;
   padding: 20px;
   box-sizing: border-box;
-  margin-right: 10%; /* Add margin on the right side */
-  margin-left: 16%; /* Add margin on the left side */
+  margin-right: 10%;
+  margin-left: 16%;
 }
 
 .content {
@@ -163,13 +173,13 @@
 }
 
 .form-control {
-  width: calc(100% ); /* Adjusted width to account for padding */
+  width: calc(100% );
   padding: 12px;
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 4px;
   margin-bottom: 10px;
-  box-sizing: border-box; /* Ensure padding is included in width */
+  box-sizing: border-box;
 }
 
 
@@ -192,36 +202,91 @@
 .message-card {
     max-width: 300px;
   padding: 30px;
-  background-color: #f8f8f8; /* Updated background color */
+  background-color: #f8f8f8;
   border-radius: 10px;
   box-shadow: 0 0 30px rgba(59, 59, 59, 0.082);
   text-align: center;
-  margin-top: 50px; /* Add margin to top */
+  margin-top: 50px;
   margin-bottom: 20px;
-  color: #444444; /* Updated text color */
-  font-size: 14px; /* Adjusted font size */
+  color: #444444;
+  font-size: 14px;
   box-sizing: border-box;
 
   overflow: hidden;
 }
 
 .warn {
-  background-color: #ffcccc; /* Light red background */
-  border: 1px solid #ff0000; /* Red border */
+  background-color: #ffcccc;
+  border: 1px solid #ff0000;
   padding: 10px;
   margin-top: 10px;
   border-radius: 4px;
   font-size: 16px;
-  color: #ff0000; /* Red text color */
+  color: #ff0000;
 }
 .message-container {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Centers items horizontally */
+  align-items: center;
   margin:auto;
 }
 
 .message-item {
-  margin-bottom: 10px; /* Adjust vertical spacing between items */
+  margin-bottom: 10px;
 }
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  justify-content: center;
+
+  transition: opacity 0.1s ease;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-animation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #303030;
+  margin: 0 5px;
+  animation: dot-pulse 1s infinite ease-in-out;
+}
+
+.dot-1 {
+  animation-delay: 0s;
+}
+
+.dot-2 {
+  animation-delay: 0.2s;
+}
+
+.dot-3 {
+  animation-delay: 0.4s;
+}
+
+@keyframes dot-pulse {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+
   </style>

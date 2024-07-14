@@ -1,4 +1,9 @@
 <template>
+      <div v-show="isLoading"class="loading-overlay">
+  <div class="dot dot-1"></div>
+  <div class="dot dot-2"></div>
+  <div class="dot dot-3"></div>
+</div>
   <div v-if="showPopup" class="sms-verification-popup">
     <MessageCard v-show="error"class="warn"
         :onError="true"
@@ -51,6 +56,7 @@ export default {
   },
   data() {
     return {
+        isLoading: false,
       otp: '',
       phoneNumber:'',
       areaCode:'',
@@ -83,21 +89,22 @@ export default {
           this.cooldownTime--;
         } else {
           clearInterval(timer);
-          this.cooldownActive = false; // Reset cooldown state
+          this.cooldownActive = false;
         }
-      }, 1000); // Update timer every second
+      }, 1000);
     },
     async sendOTP() {
         this.error=false;
         if (this.cooldownActive) return;
 
-// Set cooldown state
+
 this.cooldownActive = true;
 this.cooldownTime = this.cooldownDuration;
 
-// Start cooldown timer
+
 this.startCooldownTimer();
         try {
+            this.isLoading=true;
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
         const response = await axios.post('/otp', {phone:this.phoneNumber,area:this.areaCode});//csrf issue
@@ -110,11 +117,14 @@ this.startCooldownTimer();
         this.error=true;
 
 
+      }finally{
+        this.isLoading=false;
       }
     },
     async verifyOTP() {
         this.error=false;
         try {
+            this.isLoading=true;
             const scrf = await axios.get('/csrf');
             //console.log(scrf);
             const newCsrfToken = scrf.data.csrf_token;
@@ -132,6 +142,8 @@ this.startCooldownTimer();
         this.message=error.response.data.message;
         this.error=true;
 
+      }finally{
+        this.isLoading=false;
       }
     }
   }
@@ -141,7 +153,7 @@ this.startCooldownTimer();
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-/* Apply the font to specific elements */
+
 *, *::before, *::after {
   font-family: 'Roboto', sans-serif;
 }
@@ -159,22 +171,21 @@ this.startCooldownTimer();
   overflow: hidden;
 }
 .warn {
-  background-color: #ffcccc; /* Light red background */
-  border: 1px solid #ff0000; /* Red border */
+  background-color: #ffcccc;
+  border: 1px solid #ff0000;
   padding: 10px;
   margin-top: 10px;
   border-radius: 4px;
   font-size: 16px;
-  color: #ff0000; /* Red text color */
+  color: #ff0000;
 }
 .sms-verification-popup h3 {
-  color: #333; /* Black accent color */
+  color: #333; /
 }
 
 .sms-verification-popup label {
   color: #333;
-  /* Black accent color */
-}
+
 
 .sms-verification-popup input[type="text"],
 .sms-verification-popup select {
@@ -188,7 +199,7 @@ this.startCooldownTimer();
 }
 
 .sms-verification-popup button {
-  background-color: #000000; /* Black accent color */
+  background-color: #000000;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -202,24 +213,24 @@ this.startCooldownTimer();
 }
 
 .sms-verification-popup button:hover {
-  background-color: #3d3d3d; /* Darker black accent color */
+  background-color: #3d3d3d;
 }
 
 .sms-verification-popup .btn-secondary {
-  background-color: #a82121; /* Gray for secondary button */
+  background-color: #a82121;
   color: white;
 }
 
 .sms-verification-popup .btn-secondary:hover {
-  background-color: #c93131; /* Darker gray for secondary button hover */
+  background-color: #c93131;
 }
 
 
-/* Styles for the area code dropdown */
+
 
 .area-code-dropdown {
   position: relative;
-  width: 40%; /* Adjust width as needed */
+  width: 40%;
 
   margin: 10px;
 }
@@ -230,11 +241,11 @@ this.startCooldownTimer();
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  appearance: none; /* Remove default appearance */
-  -webkit-appearance: none; /* For older versions of Chrome/Safari */
+  appearance: none;
+  -webkit-appearance: none;
   background-color: #ffffff;
   cursor: pointer;
-  outline: none; /* Remove outline on focus */
+  outline: none;
 }
 
 .area-code-select option {
@@ -242,8 +253,8 @@ this.startCooldownTimer();
 }
 
 .area-code-select:focus {
-  border-color: #007bff; /* Example focus color */
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Example focus shadow */
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 
@@ -272,18 +283,71 @@ this.startCooldownTimer();
 }
 
 .form-control {
-  width: calc(100% ); /* Adjusted width to account for padding */
+  width: calc(100% );
   padding: 12px;
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 4px;
   margin-bottom: 10px;
-  box-sizing: border-box; /* Ensure padding is included in width */
+  box-sizing: border-box;
 }
 .content {
   max-width: 90%;
   width: 90%;
 
 
+}
+
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-animation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #303030;
+  margin: 0 5px;
+  animation: dot-pulse 1s infinite ease-in-out;
+}
+
+.dot-1 {
+  animation-delay: 0s;
+}
+
+.dot-2 {
+  animation-delay: 0.2s;
+}
+
+.dot-3 {
+  animation-delay: 0.4s;
+}
+
+@keyframes dot-pulse {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
 }
 </style>

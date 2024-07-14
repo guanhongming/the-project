@@ -17,7 +17,7 @@ class AuthC extends Controller
 
         public function store(Request $request)
         {
-            // Validate the incoming request data
+
             $validated = $request->validate([
                 'username' => 'required|string|max:255|unique:users,name|regex:/^[A-Za-z0-9_]+$/',
                 'phoneNumber' => 'required|string|unique:users,phone|max:15|regex:/^[0-9]{11}$/',
@@ -69,7 +69,7 @@ public function sentOTP(Request $request){
     $cooldownDurationInSeconds = 60;
     $cacheKey = 'otp_cooldown_' . $phone;
 
-    // Check if a cooldown period is active
+
     if (Cache::has($cacheKey)) {
 
         return response()->json(['message' => 'Too Many Requests.'], 401);
@@ -77,16 +77,16 @@ public function sentOTP(Request $request){
 
     try {
 
-       // $message = $twilio->messages->create(
-       //     $validated['area'] . $validated['phone'],
-       //     [
-       //         "body" => "Your OTP is: " . $otp,
-       //         "from" => "+17626002441",
-        //    ]
-        //);
+        $message = $twilio->messages->create(
+            $validated['area'] . $validated['phone'],
+            [
+                "body" => "Your OTP is: " . $otp,
+                "from" => "+17626002441",
+           ]
+        );
         Cache::put($cacheKey, true, now()->addSeconds($cooldownDurationInSeconds));
-        //if ($message->sid) {
-        if(true){
+        if ($message->sid) {
+        //if(true){
             return response()->json(['message' => 'OTP sent']);
         } else {
             return response()->json(['message' => 'Failed to send OTP'], 500);
@@ -94,7 +94,7 @@ public function sentOTP(Request $request){
     } catch (\Exception $e) {
 
         //Log::error('Twilio API Error: ' . $e->getMessage());
-        return response()->json(['message' => 'Failed to send OTP'], 500);
+        return response()->json(['message' => 'Failed to send OTP (e)'], 500);
     }
 }
 

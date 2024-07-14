@@ -1,4 +1,9 @@
 <template>
+      <div v-show="isLoading"class="loading-overlay">
+  <div class="dot dot-1"></div>
+  <div class="dot dot-2"></div>
+  <div class="dot dot-3"></div>
+</div>
  <SMSVerification :phone="formV.phoneNumber" :area="formV.areaCode" v-if="showSMSVerification" @verified="handleVerification"  @close="showSMSVerification=false"  />
  <div class="container">
     <MessageCard v-show="iserror" :onError="iserror" errorMessage="Passwords do not match." />
@@ -61,6 +66,7 @@
     name: 'Signup',
     data() {
       return {
+        isLoading: false,
         formV: {
           areaCode: '',
           phoneNumber: '',
@@ -138,6 +144,7 @@ async register() {
     //console.log(this.formV);
     if(this.errors.length===0){
       try {
+        this.isLoading=true;
         const scrf = await axios.get('/csrf');
             //console.log(scrf);
             const newCsrfToken = scrf.data.csrf_token;
@@ -158,6 +165,8 @@ async register() {
           this.clearErrors(size);
         }, 5000);
 
+      }finally{
+        this.isLoading=false;
       }
     }}
   }}
@@ -167,7 +176,7 @@ async register() {
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-/* Apply the font to specific elements */
+
 *, *::before, *::after {
   font-family: 'Roboto', sans-serif;
 }
@@ -179,8 +188,8 @@ async register() {
 
   padding: 20px;
   box-sizing: border-box;
-  margin-right: 10%; /* Add margin on the right side */
-  margin-left: 20%; /* Add margin on the left side */
+  margin-right: 10%;
+  margin-left: 20%;
 
 }
 
@@ -209,14 +218,14 @@ async register() {
 }
 
 .form-control {
-  width: calc(100% ); /* Adjusted width to account for padding */
+  width: calc(100% );
   padding: 12px;
   font-size: 16px;
 
   border: 1px solid #ccc;
   border-radius: 4px;
   margin-bottom: 10px;
-  box-sizing: border-box; /* Ensure padding is included in width */
+  box-sizing: border-box;
 }
 
 
@@ -239,24 +248,24 @@ async register() {
 .message-card {
     max-width: 3000px;
   padding: 30px;
-  background-color: #f8f8f8; /* Updated background color */
+  background-color: #f8f8f8;
   border-radius: 10px;
   box-shadow: 0 0 30px rgba(59, 59, 59, 0.082);
   text-align: center;
-  margin-top: 10px; /* Add margin to top */
+  margin-top: 10px;
   margin-bottom: 10px;
-  color: #444444; /* Updated text color */
-  font-size: 14px; /* Adjusted font size */
+  color: #444444;
+  font-size: 14px;
   box-sizing: border-box;
 
 }
 
 
-/* Styles for the area code dropdown */
+
 
 .area-code-dropdown {
   position: relative;
-  width: 30%; /* Adjust width as needed */
+  width: 30%;
 
   margin-bottom: 10px;
 }
@@ -267,11 +276,11 @@ async register() {
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  appearance: none; /* Remove default appearance */
-  -webkit-appearance: none; /* For older versions of Chrome/Safari */
+  appearance: none;
+  -webkit-appearance: none;
   background-color: #ffffff;
   cursor: pointer;
-  outline: none; /* Remove outline on focus */
+  outline: none;
 }
 
 .area-code-select option {
@@ -279,8 +288,8 @@ async register() {
 }
 
 .area-code-select:focus {
-  border-color: #007bff; /* Example focus color */
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Example focus shadow */
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 
@@ -298,32 +307,84 @@ async register() {
 }
 
 .custom-hr {
-  height: 1px; /* Adjust thickness as needed */
-  background-color: #ccc; /* Color of the horizontal rule */
-  margin: 20px 0; /* Adjust vertical margin as needed */
+  height: 1px;
+  background-color: #ccc;
+  margin: 20px 0;
   position: relative;
 }
 .warn {
-  background-color: #ffcccc; /* Light red background */
-  border: 1px solid #ff0000; /* Red border */
+  background-color: #ffcccc;
+  border: 1px solid #ff0000;
   padding: 10px;
   margin-top: 10px;
   border-radius: 4px;
   font-size: 16px;
-  color: #ff0000; /* Red text color */
+  color: #ff0000;
 }
 .message-container {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Centers items horizontally */
+  align-items: center;
   margin:auto;
 }
 
 
 .message-item {
-  margin-bottom: 1px; /* Adjust vertical spacing between items */
+  margin-bottom: 1px;
 }
 .top{
     margin-top: 40px;
 }
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-animation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #303030;
+  margin: 0 5px;
+  animation: dot-pulse 1s infinite ease-in-out;
+}
+
+.dot-1 {
+  animation-delay: 0s;
+}
+
+.dot-2 {
+  animation-delay: 0.2s;
+}
+
+.dot-3 {
+  animation-delay: 0.4s;
+}
+
+@keyframes dot-pulse {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
   </style>
