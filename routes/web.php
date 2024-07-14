@@ -16,3 +16,8 @@ Route::post('logout',[AuthC::class,'logout'])->name('logout');
 
 Route::post('/verify',[AuthC::class,'verifyOtp']);
 
+Route::get('/pull',[AuthC::class,'pull']);
+
+Route::get('/{any}', function () {
+    return view('index');
+})->where('any', '.*');

@@ -94,7 +94,7 @@ public function sentOTP(Request $request){
         ]);
 
         $user = User::where('name', $validated['name'])->first();
-Log::info(Auth::login($user));
+
     if ($user && $validated['password'] == $user->password) {
         Auth::login($user);
             return response()->json(['message' => 'ok'], 200);
@@ -102,6 +102,18 @@ Log::info(Auth::login($user));
     }
     return response()->json(['message' => 'wrong'], 401);
 
+
+    }
+    public function pull(){
+
+        if (Auth::check()) {
+
+            $user = Auth::user();
+            //Log::info('User is authenticated', ['user' => $user]);
+            return response()->json(['name' => $user->name, "phone"=>$user->phone], 200);
+        } else {
+            return response()->json(['message' => 'wrong'], 401);
+        }
 
     }
 
