@@ -119,17 +119,12 @@ public function sentOTP(Request $request){
 
     public function logout(){
         auth()->logout();
+
         request()->session()->invalidate();
         request()->session()->regenerate();
-        return redirect()->route('dashboard')->with('success','logged out');
+        request()->session()->regenerateToken();
+        return response()->json(['message' => 'ok'], 200);
     }
 
-    public function login(){
-        //return redirect('');
 
-    }
-    public function Identity(){
-        //return redirect('');
-
-    }
 }

@@ -86,6 +86,10 @@ async register() {
     console.log(this.formV);
     if(this.passwordsMatch){
       try {
+        const scrf = await axios.get('/csrf');
+            //console.log(scrf);
+            const newCsrfToken = scrf.data.csrf_token;
+            document.querySelector('meta[name="csrf-token"]').setAttribute('content', newCsrfToken);
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
         const response = await axios.post('/register', this.formV);//csrf issue
@@ -95,7 +99,7 @@ async register() {
 
       } catch (error) {
 
-        console.error('Registration failed:', error);
+        console.error('Registration failed:', error.message);
         // Handle validation errors here
       }
     }}

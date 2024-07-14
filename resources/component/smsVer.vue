@@ -82,6 +82,10 @@ export default {
     },
     async verifyOTP() {
         try {
+            const scrf = await axios.get('/csrf');
+            //console.log(scrf);
+            const newCsrfToken = scrf.data.csrf_token;
+            document.querySelector('meta[name="csrf-token"]').setAttribute('content', newCsrfToken);
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
 

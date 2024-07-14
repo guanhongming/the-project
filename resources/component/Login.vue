@@ -27,7 +27,7 @@
   <script>
   import MessageCard from './Card.vue';
   import SMSVerification from './smsVer.vue';
-
+  //import axios from '../js/axios-instance';
   export default {
     name: 'Login',
     data() {
@@ -44,8 +44,16 @@
         SMSVerification
     },
     methods: {
+
       async handleLogin() {
         try {
+            const scrf = await axios.get('/csrf');
+            //console.log(scrf);
+            const newCsrfToken = scrf.data.csrf_token;
+            document.querySelector('meta[name="csrf-token"]').setAttribute('content', newCsrfToken);
+           // console.log(document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+           // console.log(document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
         const response = await axios.post('/login', this.formV);//csrf issue
@@ -65,8 +73,11 @@
       handleVerification() {
     this.showSMSVerification=false;
 
-}
-    }
+},
+
+
+    },
+
   }
   </script>
 

@@ -12,6 +12,8 @@ axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[nam
     const response = await axios.get('/pull');
     //console.log(response.status == 200);
     if (response.status === 200) {
+     
+        localStorage.setItem('userData', JSON.stringify(response.data));
         if(to.path==='/dash'){
 
             next();

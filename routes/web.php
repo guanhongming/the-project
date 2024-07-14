@@ -17,7 +17,11 @@ Route::post('logout',[AuthC::class,'logout'])->name('logout');
 Route::post('/verify',[AuthC::class,'verifyOtp']);
 
 Route::get('/pull',[AuthC::class,'pull']);
-
+Route::get('/csrf', function () {
+    return response()->json(['csrf_token' => csrf_token()]);
+});
 Route::get('/{any}', function () {
     return view('index');
 })->where('any', '.*');
+
+
