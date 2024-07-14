@@ -61,7 +61,7 @@
         },
         confirmPassword: '',
         iserror:false,
-        areaCodes: ['+1', '+44', '+91', '+81', '+86', '+49'] ,
+        areaCodes: ['+44', '+91', '+81', '+86', '+49'] ,
         showSMSVerification: false
 
       }

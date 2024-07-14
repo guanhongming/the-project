@@ -32,7 +32,9 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-
+    public function ip(){
+        return $this->hasMany(Ip::class,'name','name');
+    }
 
     /**
      * Get the attributes that should be cast.

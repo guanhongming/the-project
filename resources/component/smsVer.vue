@@ -50,7 +50,7 @@ export default {
       phoneNumber:'',
       areaCode:'',
       showPopup: true,
-      areaCodes: ['+1', '+44', '+91', '+81', '+86', '+49'] ,
+      areaCodes: ['+44', '+91', '+81', '+86', '+49'] ,
       showOTPForm: false,
 
     };
@@ -76,7 +76,7 @@ export default {
 
       } catch (error) {
 
-        console.error('Registration failed:', error.response.data.errors);
+        console.error('Registration failed:(1)', error.response.data.errors);
         // Handle validation errors here
       }
     },

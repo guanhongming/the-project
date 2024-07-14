@@ -62,18 +62,17 @@
         }
 
       } catch (error) {
+        if (error.response.data.message === "otp awaits") {
+            this.showSMSVerification=true;
+            console.log('ok');
+        }
 
-        console.error('Registration failed:', error.message);
-        // Handle validation errors here
       }
 
         //this.showSMSVerification=true;
 
       },
-      handleVerification() {
-    this.showSMSVerification=false;
 
-},
 
 
     },
