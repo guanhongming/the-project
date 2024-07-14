@@ -188,7 +188,7 @@ this.startCooldownTimer();
 }
 
 .sms-verification-popup button {
-  background-color: #333; /* Black accent color */
+  background-color: #000000; /* Black accent color */
   color: white;
   border: none;
   padding: 10px 20px;
@@ -196,13 +196,13 @@ this.startCooldownTimer();
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
-  border-radius: 4px;
+  border-radius: 10px;
   cursor: pointer;
   margin: 10px;
 }
 
 .sms-verification-popup button:hover {
-  background-color: #555; /* Darker black accent color */
+  background-color: #3d3d3d; /* Darker black accent color */
 }
 
 .sms-verification-popup .btn-secondary {
