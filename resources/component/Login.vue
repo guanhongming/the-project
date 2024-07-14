@@ -7,11 +7,11 @@
         <div class="form-group">
       <div class="mb-3">
         <label for="username" class="label">Username </label>
-        <input id="username" v-model.trim.lazy="formV.name" type="text" class="form-control"/>
+        <input id="username" v-model.trim.lazy="formV.name"  placeholder="Enter your username" type="text" class="form-control"/>
       </div>
       <div class="mb-3">
         <label for="password" class="label">Password </label>
-        <input id="password" v-model.trim.lazy="formV.password" type="password" class="form-control"/>
+        <input id="password" v-model.trim.lazy="formV.password" placeholder="Enter your password"  type="password" class="form-control"/>
       </div>
       <button class="btn btn-primary btn-block" type="submit">
         Login
@@ -20,12 +20,22 @@
     </form>
 
 </div>
+<div class="message-container">
+<div  v-for="(error, index) in errors" :key="index"  class="message-item">
+      <MessageCard class="warn"
+        :onError="true"
+        :errorMessage="error"
+      />
+</div>
+<div class="message-item">
 <MessageCard
       :onError="false"
       hintText="Don't have an account?"
       hintLink="/signup"
       hintLinkText="Sign up"
     />
+</div>
+</div>
 </div>
   </template>
 
@@ -41,16 +51,36 @@
           name: '',
           password: ''
         },
-        showSMSVerification: false
+        showSMSVerification: false,
+        errors: [],
       }
     },
     components:{
         MessageCard,
         SMSVerification
     },
-    methods: {
+    watch: {
 
+  },
+    methods: {
+        errorTImeout(){
+            setTimeout(() => {
+          this.isError = false;
+        }, 5000);
+        },
+
+        validate(){
+            const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
+            if(this.formV.name.length < 4 || specialCharRegex.test(this.formV.name) || this.formV.password.length < 8){
+                if(!this.errors.includes("Incorrect username or password"))
+                this.errors.push("Incorrect username or password");
+                return false;
+            }
+            return true;
+        },
       async handleLogin() {
+        if(this.validate()){
+            this.errors=this.errors.filter(error => error !== "Incorrect username or password");
         try {
             const scrf = await axios.get('/csrf');
             //console.log(scrf);
@@ -70,9 +100,12 @@
         if (error.response.data.message === "otp awaits") {
             this.showSMSVerification=true;
             console.log('ok');
+        }else{
+            if(!this.errors.includes("Incorrect username or password"))
+                this.errors.push("Incorrect username or password");
         }
 
-      }
+      }}
 
         //this.showSMSVerification=true;
 
@@ -111,8 +144,8 @@
   width: 55%;
   padding: 20px;
   background-color: #fff;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.233);
+  border-radius: 10px;
   text-align: center;
   overflow: hidden;
 
@@ -159,19 +192,36 @@
 .message-card {
     max-width: 300px;
   padding: 30px;
-  background-color: #f0efef; /* Updated background color */
+  background-color: #f8f8f8; /* Updated background color */
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 30px rgba(59, 59, 59, 0.082);
   text-align: center;
-  margin-top: 20px; /* Add margin to top */
+  margin-top: 50px; /* Add margin to top */
   margin-bottom: 20px;
   color: #444444; /* Updated text color */
   font-size: 14px; /* Adjusted font size */
   box-sizing: border-box;
-  margin: auto;
+
   overflow: hidden;
 }
 
+.warn {
+  background-color: #ffcccc; /* Light red background */
+  border: 1px solid #ff0000; /* Red border */
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 4px;
+  font-size: 16px;
+  color: #ff0000; /* Red text color */
+}
+.message-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centers items horizontally */
+  margin:auto;
+}
 
-
+.message-item {
+  margin-bottom: 10px; /* Adjust vertical spacing between items */
+}
   </style>

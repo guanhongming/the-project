@@ -1,5 +1,9 @@
 <template>
   <div v-if="showPopup" class="sms-verification-popup">
+    <MessageCard v-show="error"class="warn"
+        :onError="true"
+        :errorMessage="message"
+      />
     <h2 class="">Verify Your Phone Number</h2>
     <form @submit.prevent="sendOTP" class="content">
         <div class="area-code-dropdown mb-3">
@@ -13,7 +17,7 @@
         <input class="form-control" id="phoneNumber" v-model="phoneNumber" type="text" />
       </div>
 
-      <button class="btn btn-primary" type="submit" :disabled="!phoneNumber.trim()">Verify Phone Number</button>
+      <button class="btn btn-primary" type="submit" :disabled="cooldownActive">Verify Phone Number <span v-if="cooldownActive"> ({{ cooldownTime }}s)</span></button>
     </form>
 
     <div v-if="showOTPForm">
@@ -22,7 +26,7 @@
           <label for="otp" class="label">Enter OTP</label>
           <input class="form-control" id="otp" v-model="otp" type="text" />
         </div>
-        <button class="btn btn-primary" type="submit" :disabled="!otp.trim()">Verify OTP</button>
+        <button class="btn btn-primary" type="submit" >Verify OTP</button>
       </form>
     </div>
   <div>
@@ -32,6 +36,7 @@
 </template>
 
 <script>
+import MessageCard from './Card.vue';
 export default {
   name: 'SMSVerification',
   props: {
@@ -52,9 +57,16 @@ export default {
       showPopup: true,
       areaCodes: ['+44', '+91', '+81', '+86', '+49'] ,
       showOTPForm: false,
-
+        message:'',
+        cooldownActive: false,
+      cooldownTime: 0,
+      cooldownDuration: 60,
+        error:false
     };
   },
+  components:{
+        MessageCard,
+    },
   created() {
     console.log(this.phone);
     if (this.area) {
@@ -65,7 +77,26 @@ export default {
     }
   },
   methods: {
+    startCooldownTimer() {
+      const timer = setInterval(() => {
+        if (this.cooldownTime > 0) {
+          this.cooldownTime--;
+        } else {
+          clearInterval(timer);
+          this.cooldownActive = false; // Reset cooldown state
+        }
+      }, 1000); // Update timer every second
+    },
     async sendOTP() {
+        this.error=false;
+        if (this.cooldownActive) return;
+
+// Set cooldown state
+this.cooldownActive = true;
+this.cooldownTime = this.cooldownDuration;
+
+// Start cooldown timer
+this.startCooldownTimer();
         try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
@@ -75,12 +106,14 @@ export default {
         }
 
       } catch (error) {
+        this.message=error.response.data.message;
+        this.error=true;
 
-        console.error('Registration failed:(1)', error.response.data.errors);
-        // Handle validation errors here
+
       }
     },
     async verifyOTP() {
+        this.error=false;
         try {
             const scrf = await axios.get('/csrf');
             //console.log(scrf);
@@ -90,15 +123,15 @@ export default {
             axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
 
         const response = await axios.post('/verify', {otp:this.otp});//csrf issue
-        console.log(response);
+
         if (response.status === 200) {
             this.$router.push({ name: 'Dash' });
         }
 
       } catch (error) {
+        this.message=error.response.data.message;
+        this.error=true;
 
-        console.error('Registration failed:', response);
-        // Handle validation errors here
       }
     }
   }
@@ -125,7 +158,15 @@ export default {
 
   overflow: hidden;
 }
-
+.warn {
+  background-color: #ffcccc; /* Light red background */
+  border: 1px solid #ff0000; /* Red border */
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 4px;
+  font-size: 16px;
+  color: #ff0000; /* Red text color */
+}
 .sms-verification-popup h3 {
   color: #333; /* Black accent color */
 }

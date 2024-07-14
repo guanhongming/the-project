@@ -40,7 +40,7 @@ export default {
                 delete axios.defaults.headers.common['X-CSRF-TOKEN'];
                 this.$router.push('/');
             } catch (error) {
-                console.error('Logout failed:', error);
+                
             }
         }
     },

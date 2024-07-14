@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use Twilio\Rest\Client;
 
+use Illuminate\Support\Facades\Cache;
+
 
 class AuthC extends Controller
 {
@@ -17,22 +19,26 @@ class AuthC extends Controller
         {
             // Validate the incoming request data
             $validated = $request->validate([
-                'username' => 'required|string|max:255|unique:users,name',
+                'username' => 'required|string|max:255|unique:users,name|regex:/^[A-Za-z0-9_]+$/',
                 'phoneNumber' => 'required|string|unique:users,phone|max:15|regex:/^[0-9]{11}$/',
-                'areaCode' => 'required|string|max:3',
+                'areaCode' => 'required|string|size:3',
                 'password' => 'required|string|min:8',//change
             ]);
 
 session(['registration_data' => $validated,]);
 
 
-            return response()->json(['message' => 'OTP awaits']);
+            return response()->json(['message' => 'OTP awaits'],200);
     }
 
 public function sentOTP(Request $request){
     $sid = "AC6ed2e169470454f726e219a7cb2a3f87";
     $token = "ba16f3898f02e489a0bf59794ee326d7";
     $twilio = new Client($sid, $token);
+
+
+
+
 
     $otp = "123456";
 
@@ -47,13 +53,26 @@ public function sentOTP(Request $request){
     if(session()->has("registration_data")){
         $user = session('registration_data');
         $phone=$user["phoneNumber"];
+        $area=$user["areaCode"];
     }elseif(session()->has("user_data")){
         $user = session('user_data');
         $phone=$user["phone"];
+        $area=$user["area"];
 
     }
     if($phone!==$validated["phone"]){
-        return response()->json(['error' => 'wrong number'], 401);
+        return response()->json(['message' => 'Phone number disagreement'], 401);
+    }
+    if($area!=='+86' || $area!==$validated['area']){
+        return response()->json(['message' => 'Can not complete request (Area Code)'], 401);
+    }
+    $cooldownDurationInSeconds = 60;
+    $cacheKey = 'otp_cooldown_' . $phone;
+
+    // Check if a cooldown period is active
+    if (Cache::has($cacheKey)) {
+
+        return response()->json(['message' => 'Too Many Requests.'], 401);
     }
 
     try {
@@ -65,17 +84,17 @@ public function sentOTP(Request $request){
        //         "from" => "+17626002441",
         //    ]
         //);
-
+        Cache::put($cacheKey, true, now()->addSeconds($cooldownDurationInSeconds));
         //if ($message->sid) {
         if(true){
             return response()->json(['message' => 'OTP sent']);
         } else {
-            return response()->json(['error' => 'Failed to send OTP'], 500);
+            return response()->json(['message' => 'Failed to send OTP'], 500);
         }
     } catch (\Exception $e) {
 
-        Log::error('Twilio API Error: ' . $e->getMessage());
-        return response()->json(['error' => 'Failed to send OTP'], 500);
+        //Log::error('Twilio API Error: ' . $e->getMessage());
+        return response()->json(['message' => 'Failed to send OTP'], 500);
     }
 }
 
@@ -139,8 +158,8 @@ public function sentOTP(Request $request){
 
     public function auth(Request $request){
         $validated=$request->validate([
-            'name'=>'required|string|min:4',
-            'password'=>'string|required'
+            'name'=>'required|string|min:4|regex:/^[A-Za-z0-9_]+$/',
+            'password'=>'string|required|min:8'
         ]);
 
         $user = User::where('name', $validated['name'])->first();

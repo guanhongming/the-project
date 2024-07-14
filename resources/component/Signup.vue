@@ -14,22 +14,22 @@
 
       <div class="form-group mb-3">
         <label for="phoneNumber" class="label">Phone Number </label>
-        <input id="phoneNumber" v-model="formV.phoneNumber" type="text" class="form-control" required>
+        <input id="phoneNumber" v-model.lazy.trim="formV.phoneNumber" @change="VPhone" @type="text" class="form-control" required>
       </div>
       <div class="custom-hr"></div>
       <div class="form-group mb-3">
         <label for="username" class="label">Username </label>
-        <input id="username" v-model="formV.username" type="text" class="form-control" required>
+        <input id="username" v-model.lazy.trim="formV.username" @change="VName" type="text" class="form-control" required>
       </div>
 
       <div class="form-group mb-3">
         <label for="password" class="label">Password </label>
-        <input id="password" v-model="formV.password" type="password" class="form-control" required>
+        <input id="password" v-model.lazy.trim="formV.password"  @change="VPassword"type="password" class="form-control" required>
       </div>
 
       <div class="form-group mb-3">
         <label for="confirmPassword" class="label">Confirm Password</label>
-        <input id="confirmPassword" v-model="confirmPassword" type="password" class="form-control" required>
+        <input id="confirmPassword" v-model.lazy.trim="confirmPassword" @change="VConfirm"type="password" class="form-control" required>
       </div>
 
       <button class="btn btn-primary btn-block" type="submit">
@@ -37,7 +37,19 @@
       </button>
     </form>
 
+    <div class="message-container">
+<div  v-for="(error, index) in errors" :key="index"  class="message-item">
+      <MessageCard class="warn"
+        :onError="true"
+        :errorMessage="error"
+      />
+</div>
+
+<div class="top message-item">
     <MessageCard :onError="false" hintText="Already have an account?" hintLink="/" hintLinkText="Login" />
+</div>
+</div>
+
   </div>
   </template>
 
@@ -56,7 +68,7 @@
           password: ''
         },
         confirmPassword: '',
-        iserror:false,
+        errors: [],
         areaCodes: ['+44', '+91', '+81', '+86', '+49'] ,
         showSMSVerification: false
 
@@ -67,20 +79,64 @@
         SMSVerification
     },
     computed: {
-    passwordsMatch() {
-      return this.formV.password === this.confirmPassword;
-    }
+
   },
     methods: {
+        VConfirm(){
+            const size="Passwords do not match";
+            if(this.formV.password !== this.confirmPassword){
 
+                if(!this.errors.includes(size))
+                this.errors.push(size);
+            }else{
+                this.errors=this.errors.filter(error => error !== size);}
+        },
+        VPhone(){
+            const size="Invalid phone number";
+            if (this.formV.phoneNumber.length !==11 ) {
+                if(!this.errors.includes(size))
+                this.errors.push(size);
+            }else{
+                this.errors=this.errors.filter(error => error !== size);}
+        },
+        VName(){
+            const size="Username requires at least 4 characters.";
+            if (this.formV.username.length < 4 ) {
+                if(!this.errors.includes(size))
+                this.errors.push("Username requires at least 4 characters.");
+
+
+            }else{
+                this.errors=this.errors.filter(error => error !== "Username requires at least 4 characters.");
+            }
+            const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
+
+        if (specialCharRegex.test(this.formV.username) ){
+            if(!this.errors.includes('Username should not contain special characters.'))
+            this.errors.push('Username should not contain special characters.');
+        } else {
+            this.errors=this.errors.filter(error => error !== "Username should not contain special characters.");
+        }
+        },
+        VPassword(){
+            if (this.formV.password.length < 8) {
+                if(!this.errors.includes('Password requires at least 8 characters.'))
+                this.errors.push("Password requires at least 8 characters.");
+
+            }else{
+                this.errors=this.errors.filter(error => error !== "Password requires at least 8 characters.");
+            }
+        },
     handleVerification() {
     this.showSMSVerification=false;
 
 },
-
+clearErrors(size){
+    this.errors=this.errors.filter(error => error !== size);
+},
 async register() {
-    console.log(this.formV);
-    if(this.passwordsMatch){
+    //console.log(this.formV);
+    if(this.errors.length===0){
       try {
         const scrf = await axios.get('/csrf');
             //console.log(scrf);
@@ -95,8 +151,13 @@ async register() {
 
       } catch (error) {
 
-        console.error('Registration failed:', error.message);
-        // Handle validation errors here
+        const size="Error ("+error.response.data.message+")";
+                if(!this.errors.includes(size)){
+               this.errors.push(size);}
+               setTimeout(() => {
+          this.clearErrors(size);
+        }, 5000);
+
       }
     }}
   }}
@@ -115,9 +176,7 @@ async register() {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-image: url('~@/assets/background.jpg');
-  background-size: cover;
-  background-position: center;
+
   padding: 20px;
   box-sizing: border-box;
   margin-right: 10%; /* Add margin on the right side */
@@ -130,8 +189,8 @@ async register() {
   width: 45%;
   padding: 20px;
   background-color: #fff;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.233);
+  border-radius: 10px;
 
   text-align: center;
   overflow: hidden;
@@ -180,16 +239,16 @@ async register() {
 .message-card {
     max-width: 3000px;
   padding: 30px;
-  background-color: #f0efef; /* Updated background color */
+  background-color: #f8f8f8; /* Updated background color */
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 30px rgba(59, 59, 59, 0.082);
   text-align: center;
-  margin-top: 20px; /* Add margin to top */
-  margin-bottom: 20px;
+  margin-top: 10px; /* Add margin to top */
+  margin-bottom: 10px;
   color: #444444; /* Updated text color */
   font-size: 14px; /* Adjusted font size */
   box-sizing: border-box;
-  margin: auto;
+
 }
 
 
@@ -244,6 +303,27 @@ async register() {
   margin: 20px 0; /* Adjust vertical margin as needed */
   position: relative;
 }
+.warn {
+  background-color: #ffcccc; /* Light red background */
+  border: 1px solid #ff0000; /* Red border */
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 4px;
+  font-size: 16px;
+  color: #ff0000; /* Red text color */
+}
+.message-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centers items horizontally */
+  margin:auto;
+}
 
 
+.message-item {
+  margin-bottom: 1px; /* Adjust vertical spacing between items */
+}
+.top{
+    margin-top: 40px;
+}
   </style>
