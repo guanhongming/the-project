@@ -93,7 +93,7 @@ public function sentOTP(Request $request){
         }
     } catch (\Exception $e) {
 
-        //Log::error('Twilio API Error: ' . $e->getMessage());
+       // Log::error('Twilio API Error: ' . $e->getMessage());
         return response()->json(['message' => 'Failed to send OTP (e)'], 500);
     }
 }

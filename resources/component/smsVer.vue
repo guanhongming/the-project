@@ -180,13 +180,13 @@ this.startCooldownTimer();
   color: #ff0000;
 }
 .sms-verification-popup h3 {
-  color: #333; /
+  color: #333;
 }
 
 .sms-verification-popup label {
   color: #333;
 
-
+}
 .sms-verification-popup input[type="text"],
 .sms-verification-popup select {
   width: 100%;
@@ -295,7 +295,6 @@ this.startCooldownTimer();
   max-width: 90%;
   width: 90%;
 
-
 }
 
 
@@ -349,5 +348,5 @@ this.startCooldownTimer();
     opacity: 1;
   }
 }
-}
+
 </style>
